@@ -16,6 +16,10 @@ public class TourPanel extends JPanel {
     private String selectedDate = "";
     private int organiserStaffID = -1;
 
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+
     public TourPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 

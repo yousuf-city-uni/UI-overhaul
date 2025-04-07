@@ -1,7 +1,7 @@
 public class Scene {
 
     // Scenes = Intro, Login, Menu, Booking
-    private String scene = "Intro";
+    private String scene = "Booking";
 
     public String getScene() {
         return scene;

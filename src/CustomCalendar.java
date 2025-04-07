@@ -11,14 +11,22 @@ public class CustomCalendar extends JPanel {
     private JLabel monthLabel;
     private JPanel daysPanel;
     private YearMonth currentMonth;
-
-    public String getSelectedDate() {
-        return selectedDate;
-    }
+    private StringSender sender = new StringSender();
+    private StringReceiver receiver;
 
     private String selectedDate;
 
-    public CustomCalendar() {
+    private final RoomPanel roomPanel;
+    private final ShowPanel showPanel;
+    private final TourPanel tourPanel;
+
+    public CustomCalendar(StringReceiver receiver, RoomPanel roomPanel, ShowPanel showPanel, TourPanel tourPanel) {
+        this.receiver = receiver;
+        this.roomPanel = roomPanel;
+        this.showPanel = showPanel;
+        this.tourPanel = tourPanel;
+
+        sender.setStringListener(receiver);
         setLayout(new BorderLayout());
 
         currentMonth = YearMonth.now();
@@ -86,6 +94,7 @@ public class CustomCalendar extends JPanel {
             dayButton.addActionListener(e -> {
                 LocalDate date = currentMonth.atDay(dayValue);
                 selectedDate = date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                roomPanel.setSelectedDate(selectedDate);
                 System.out.println("Selected date: " + selectedDate);
             });
             daysPanel.add(dayButton);

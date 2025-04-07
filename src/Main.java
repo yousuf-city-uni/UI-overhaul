@@ -13,7 +13,7 @@ public class Main {
         Palette palette = new Palette();
         Intro intro = new Intro(palette);
         Login login = new Login(palette, jdbc);
-        BookingMenu bookingMenu = new BookingMenu(palette, scene, frame);
+        BookingMenu bookingMenu = new BookingMenu(palette, scene, frame, jdbc);
         MainMenu mainMenu = new MainMenu(palette, scene, frame, intro, login, bookingMenu);
         bookingMenu.setMainMenu(mainMenu);
 

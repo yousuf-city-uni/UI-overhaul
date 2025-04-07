@@ -33,6 +33,11 @@ public class RoomPanel extends JPanel {
 
     // Data storage
     private List<Venue> venues = new ArrayList<>();
+
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+
     private String selectedDate = "";
     // Full list of possible hours.
     private final String[] hours = {
@@ -48,7 +53,7 @@ public class RoomPanel extends JPanel {
 
         JPanel topPanel = new JPanel();
         JPanel roomSelectionPanel = new JPanel();
-        roomSelectionPanel.add(new JLabel("Select Room:"));
+        roomSelectionPanel.add(new JLabel("Select Room:" + selectedDate));
 
         String[] venueNames = venues.stream().map(Venue::getName).toArray(String[]::new);
         roomCombo = new JComboBox<>(venueNames);
