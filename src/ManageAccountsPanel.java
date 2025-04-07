@@ -23,7 +23,7 @@ public class ManageAccountsPanel extends JPanel {
     // Friends of Lancaster Management components
     private JTable friendsTable;
     private DefaultTableModel friendsTableModel;
-    private JButton editFriendButton;       // New: edits both name and email
+    private JButton editFriendButton;       // Edits both name and email
     private JButton toggleSubscriptionButton;
     private JButton deleteFriendButton;
 
@@ -183,9 +183,19 @@ public class ManageAccountsPanel extends JPanel {
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error deleting client:\n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            // Check if error is due to foreign key constraint violation (MySQL error code 1451)
+            if (e.getErrorCode() == 1451) {
+                // Show a user-friendly message
+                JOptionPane.showMessageDialog(this,
+                        "This client has associated bookings and cannot be deleted.\n" +
+                                "Please remove or reassign those bookings first.",
+                        "Deletion Error",
+                        JOptionPane.ERROR_MESSAGE);
+            } else {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error deleting client:\n" + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
