@@ -276,6 +276,10 @@ public class ManageAccountsPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Update failed or record not found.",
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
+        } catch (SQLSyntaxErrorException e) {
+            // Catch permission-related update error for FriendsOfLancasters table
+            JOptionPane.showMessageDialog(this, "Insufficient privileges to update friend record:\n" + e.getMessage(),
+                    "Permission Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error updating friend:\n" + e.getMessage(),
@@ -307,6 +311,10 @@ public class ManageAccountsPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Update failed or record not found.",
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
+        } catch (SQLSyntaxErrorException e) {
+            // Catch permission-related update error
+            JOptionPane.showMessageDialog(this, "Insufficient privileges to toggle subscription:\n" + e.getMessage(),
+                    "Permission Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error toggling subscription:\n" + e.getMessage(),
@@ -404,3 +412,4 @@ public class ManageAccountsPanel extends JPanel {
         }
     }
 }
+
