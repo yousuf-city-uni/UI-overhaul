@@ -12,6 +12,10 @@ public class RoomPanel extends JPanel {
     private JComboBox<String> roomCombo;
     private JTextArea roomDetailsArea;
 
+    public JLabel getSelectedDateLabel() {
+        return selectedDateLabel;
+    }
+
     // Date selection components
     private JLabel selectedDateLabel;
     private JButton pickDateButton;
@@ -53,7 +57,8 @@ public class RoomPanel extends JPanel {
 
         JPanel topPanel = new JPanel();
         JPanel roomSelectionPanel = new JPanel();
-        roomSelectionPanel.add(new JLabel("Select Room:" + selectedDate));
+        selectedDateLabel = new JLabel("Select Room:" + selectedDate);
+        roomSelectionPanel.add(selectedDateLabel);
 
         String[] venueNames = venues.stream().map(Venue::getName).toArray(String[]::new);
         roomCombo = new JComboBox<>(venueNames);

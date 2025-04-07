@@ -95,6 +95,8 @@ public class CustomCalendar extends JPanel {
                 LocalDate date = currentMonth.atDay(dayValue);
                 selectedDate = date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 roomPanel.setSelectedDate(selectedDate);
+                tourPanel.setSelectedDate(selectedDate);
+                showPanel.setSelectedDate(selectedDate);
                 System.out.println("Selected date: " + selectedDate);
             });
             daysPanel.add(dayButton);

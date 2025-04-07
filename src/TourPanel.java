@@ -45,9 +45,9 @@ public class TourPanel extends JPanel {
 
         // Tour date
         dateLabel = new JLabel("Tour Date: Not Selected");
-        pickDateButton = new JButton("Pick Tour Date");
+        //pickDateButton = new JButton("Pick Tour Date");
         add(dateLabel);
-        add(pickDateButton);
+        //add(pickDateButton);
 
         // Confirm booking
         confirmTourButton = new JButton("Confirm Tour");
@@ -168,17 +168,6 @@ public class TourPanel extends JPanel {
         organisedByLabel.setText("None");
         selectedDate = "";
         dateLabel.setText("Tour Date: Not Selected");
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Tour Booking Test");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 200);
-            frame.add(new TourPanel());
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
     }
 }
 

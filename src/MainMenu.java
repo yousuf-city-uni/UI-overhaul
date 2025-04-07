@@ -18,6 +18,7 @@ public class MainMenu extends JPanel {
     private Image settingsIconDark;
     private int pWidth = 1280;
     private int pHeight = 720;
+    private AddClientWindow clientWindow;
 
     private boolean isSignedOut = false;
     public boolean isSignedOut() {
@@ -122,7 +123,7 @@ public class MainMenu extends JPanel {
             }
         });
 
-        clientsButton = new JButton("Clients");
+        clientsButton = new JButton("Add Client");
         bookingsButton = new JButton("Bookings");
         signOutButton = new JButton("Sign Out");
 
@@ -186,6 +187,14 @@ public class MainMenu extends JPanel {
         centerPanel.add(signOutButton);
         centerPanel.add(Box.createVerticalGlue());
 
+        clientsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("client window");
+                clientWindow = new AddClientWindow();
+                clientWindow.setVisible(true);
+            }
+        });
         bookingsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
