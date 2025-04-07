@@ -50,7 +50,7 @@ public class AddClientWindow extends JFrame {
         // Create button
         createButton = new JButton("Create Client");
         createButton.addActionListener(e -> createClient());
-        // We'll use an empty label on the left so the button can align in the second column
+        // Use an empty label on the left so the button aligns in the second column
         add(new JLabel());
         add(createButton);
     }
@@ -81,19 +81,13 @@ public class AddClientWindow extends JFrame {
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
-                // Optionally retrieve the generated ClientID if needed
-                // ResultSet rs = stmt.getGeneratedKeys();
-                // if (rs.next()) {
-                //     int newClientId = rs.getInt(1);
-                // }
-
-                // If the Friends of Lancaster checkbox is selected, also insert into FriendsOfLancasters
+                // If the Friends of Lancaster checkbox is selected,
+                // insert into FriendsOfLancaster using the client's name (not the client type)
                 if (friendsOfLancasterCheckBox.isSelected()) {
                     insertIntoFriendsOfLancaster(conn, name, email);
                 }
-
                 JOptionPane.showMessageDialog(this, "Client created successfully!");
-                dispose();  // close this window
+                dispose();  // Close this window
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to create client.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -103,16 +97,15 @@ public class AddClientWindow extends JFrame {
         }
     }
 
-    private void insertIntoFriendsOfLancaster(Connection conn, String name, String email) throws SQLException {
-        // Example: set SubscriptionStatus = 'Active' and PriorityAccessStartDate = today
-        String sqlFoL = "INSERT INTO FriendsOfLancasters (Name, Email, SubscriptionStatus, PriorityAccessStartDate) "
-                + "VALUES (?, ?, ?, ?)";
-
+    private void insertIntoFriendsOfLancaster(Connection conn, String clientName, String email) throws SQLException {
+        // Insert the client's name and email into FriendsOfLancaster table
+        String sqlFoL = "INSERT INTO FriendsOfLancasters (Name, Email, SubscriptionStatus, PriorityAccessStartDate) " +
+                "VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sqlFoL)) {
-            stmt.setString(1, name);
+            stmt.setString(1, clientName); // Use the client's name (not the client type)
             stmt.setString(2, email);
-            stmt.setString(3, "Active"); // or retrieve from a field if needed
-            stmt.setDate(4, Date.valueOf(LocalDate.now())); // today's date
+            stmt.setString(3, "Active"); // Default subscription status
+            stmt.setDate(4, Date.valueOf(LocalDate.now())); // Today's date
             stmt.executeUpdate();
         }
     }
