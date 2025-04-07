@@ -60,7 +60,7 @@ public class BookingMenu extends JPanel {
         });
 
         addBooking.add(cardPanel);
-        tabbedPane.addTab("Booking", addBooking);
+        tabbedPane.addTab("Add Booking", addBooking);
         leftPanel.add(tabbedPane, BorderLayout.SOUTH);
 
         JPanel rightPanel = new JPanel() {

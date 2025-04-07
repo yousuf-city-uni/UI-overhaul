@@ -63,32 +63,30 @@ public class RoomPanel extends JPanel {
         roomDetailsArea.setEditable(false);
         roomDetailsArea.setLineWrap(true);
         roomDetailsArea.setWrapStyleWord(true);
-        roomDetailsArea.setPreferredSize(new Dimension(300, 100)); // Limit the size of the text area
-        roomDetailsArea.setMaximumSize(new Dimension(350, Integer.MAX_VALUE)); // Don't let it expand too much
+        roomDetailsArea.setPreferredSize(new Dimension(60, 100)); // Limit the size of the text area
+        roomDetailsArea.setMaximumSize(new Dimension(70, Integer.MAX_VALUE)); // Don't let it expand too much
         if (!venues.isEmpty()) {
             updateRoomDetails(0);
         }
         topPanel.add(new JScrollPane(roomDetailsArea), BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        // Bottom panel for date/time/client selection + confirm
-        JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 5, 5)); // Reduced spacing
+        JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 1, 1)); // Reduced spacing
 
-        // Date selection panel
-        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced padding
+        JPanel datePanel = new JPanel();
         selectedDateLabel = new JLabel("Selected Date: " + selectedDate);
         datePanel.add(selectedDateLabel);
         bottomPanel.add(datePanel);
 
         // All Day panel
-        JPanel allDayPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced padding
+        JPanel allDayPanel = new JPanel(); // Reduced padding
         allDayCheckBox = new JCheckBox("All Day Booking");
         allDayCheckBox.addActionListener(e -> toggleAllDay());
         allDayPanel.add(allDayCheckBox);
         bottomPanel.add(allDayPanel);
 
         // Start Hour panel
-        JPanel startTimePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced padding
+        JPanel startTimePanel = new JPanel(); // Reduced padding
         startTimePanel.add(new JLabel("Start Hour:"));
         timeCombo = new JComboBox<>(hours);
         timeCombo.setSelectedIndex(-1); // no selection
@@ -97,7 +95,7 @@ public class RoomPanel extends JPanel {
         bottomPanel.add(startTimePanel);
 
         // End Hour panel
-        JPanel endTimePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced padding
+        JPanel endTimePanel = new JPanel(); // Reduced padding
         endTimePanel.add(new JLabel("End Hour:"));
         endHourCombo = new JComboBox<>();
         endHourCombo.setEnabled(false);
@@ -105,7 +103,7 @@ public class RoomPanel extends JPanel {
         bottomPanel.add(endTimePanel);
 
         // Client selection panel
-        JPanel clientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced padding
+        JPanel clientPanel = new JPanel(); // Reduced padding
         selectedClientLabel = new JLabel("Selected Client: None");
         selectClientButton = new JButton("Select Client");
         selectClientButton.setPreferredSize(new Dimension(150, 30));
@@ -115,7 +113,7 @@ public class RoomPanel extends JPanel {
         bottomPanel.add(clientPanel);
 
         // Confirm booking button panel
-        JPanel confirmPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5)); // Reduced padding
+        JPanel confirmPanel = new JPanel(); // Reduced padding
         confirmButton = new JButton("Confirm Booking");
         confirmButton.addActionListener(e -> performBooking());
         confirmPanel.add(confirmButton);
