@@ -1,6 +1,8 @@
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
@@ -8,6 +10,14 @@ public class BookingMenu extends JPanel {
     private final Palette palette;
     private final JTabbedPane tabbedPane;
     private final JLabel headerLabel;
+    private final Scene scene;
+    private final JFrame frame;
+
+    public void setMainMenu(MainMenu mainMenu) {
+        this.mainMenu = mainMenu;
+    }
+
+    private MainMenu mainMenu;
     private RoomPanel roomPanel;
     private TourPanel tourPanel;
     private ShowPanel showPanel;
@@ -16,8 +26,11 @@ public class BookingMenu extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
-    public BookingMenu(Palette palette) {
+    public BookingMenu(Palette palette, Scene scene, JFrame frame) {
         this.palette = palette;
+        this.scene = scene;
+        this.frame = frame;
+
         this.setLayout(new BorderLayout());
 
         tabbedPane = new JTabbedPane();
@@ -38,6 +51,21 @@ public class BookingMenu extends JPanel {
         headerPanel.setLayout(new BorderLayout());
         headerPanel.setOpaque(false);
         headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton returnButton = new JButton("Menu");
+
+        returnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(BookingMenu.this);
+                frame.add(mainMenu);
+                scene.setScene("Menu");
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+
+        headerPanel.add(returnButton, BorderLayout.WEST);
         headerPanel.add(headerLabel, BorderLayout.CENTER);
 
         JPanel bookingTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

@@ -13,8 +13,9 @@ public class Main {
         Palette palette = new Palette();
         Intro intro = new Intro(palette);
         Login login = new Login(palette, jdbc);
-        BookingMenu bookingMenu = new BookingMenu(palette);
+        BookingMenu bookingMenu = new BookingMenu(palette, scene, frame);
         MainMenu mainMenu = new MainMenu(palette, scene, frame, intro, login, bookingMenu);
+        bookingMenu.setMainMenu(mainMenu);
 
         window.setVisible(true);
 
