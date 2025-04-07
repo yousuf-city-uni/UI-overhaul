@@ -13,12 +13,14 @@ public class MainMenu extends JPanel {
     private JButton clientsButton;
     private JButton bookingsButton;
     private JButton signOutButton;
+    private JButton manageAccountsButton;
     private JLabel welcomeLabel;
     private Image settingsIconLight;
     private Image settingsIconDark;
     private int pWidth = 1280;
     private int pHeight = 720;
     private AddClientWindow clientWindow;
+    private ManageAccountsPanel manageAccountsPanel; // New management panel
 
     private boolean isSignedOut = false;
     public boolean isSignedOut() {
@@ -38,6 +40,7 @@ public class MainMenu extends JPanel {
 
         setLayout(new BorderLayout());
 
+        // Settings icon initialization
         settingsIconLight = new ImageIcon("src/assets/icons/settings_light.png").getImage();
         settingsIconDark = new ImageIcon("src/assets/icons/settings_dark.png").getImage();
         Image scaledImage;
@@ -99,17 +102,16 @@ public class MainMenu extends JPanel {
             }
         });
 
+        // Top bar with welcome message and settings button
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
         topBar.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
 
         String welcomeMessage = "Welcome User";
-
         welcomeLabel = new JLabel(welcomeMessage);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         welcomeLabel.setForeground(palette.getTextColor());
         topBar.add(welcomeLabel, BorderLayout.WEST);
-
         topBar.add(settingsButton, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
@@ -123,30 +125,37 @@ public class MainMenu extends JPanel {
             }
         });
 
+        // Main buttons initialization
         clientsButton = new JButton("Add Client");
         bookingsButton = new JButton("Bookings");
         signOutButton = new JButton("Sign Out");
+        manageAccountsButton = new JButton("Manage Accounts");
 
         Font buttonFont = new Font("Arial", Font.PLAIN, 18);
         clientsButton.setFont(buttonFont);
         bookingsButton.setFont(buttonFont);
         signOutButton.setFont(buttonFont);
+        manageAccountsButton.setFont(buttonFont);
 
         clientsButton.setBackground(palette.getGreen());
         bookingsButton.setBackground(palette.getGreen());
         signOutButton.setBackground(palette.getGreen());
+        manageAccountsButton.setBackground(palette.getGreen());
 
         clientsButton.setForeground(palette.getTextColor());
         bookingsButton.setForeground(palette.getTextColor());
         signOutButton.setForeground(palette.getTextColor());
+        manageAccountsButton.setForeground(palette.getTextColor());
 
         clientsButton.setBorder(BorderFactory.createLineBorder(palette.getGreen(), 2));
         bookingsButton.setBorder(BorderFactory.createLineBorder(palette.getGreen(), 2));
         signOutButton.setBorder(BorderFactory.createLineBorder(palette.getGreen(), 2));
+        manageAccountsButton.setBorder(BorderFactory.createLineBorder(palette.getGreen(), 2));
 
         clientsButton.setFocusPainted(false);
         bookingsButton.setFocusPainted(false);
         signOutButton.setFocusPainted(false);
+        manageAccountsButton.setFocusPainted(false);
 
         MouseAdapter hoverEffect = new MouseAdapter() {
             @Override
@@ -156,7 +165,6 @@ public class MainMenu extends JPanel {
                 button.setForeground(palette.getGreen());
                 button.setBorder(BorderFactory.createLineBorder(palette.getTextColor(), 2));
             }
-
             @Override
             public void mouseExited(MouseEvent e) {
                 JButton button = (JButton) e.getSource();
@@ -169,11 +177,14 @@ public class MainMenu extends JPanel {
         clientsButton.addMouseListener(hoverEffect);
         bookingsButton.addMouseListener(hoverEffect);
         signOutButton.addMouseListener(hoverEffect);
+        manageAccountsButton.addMouseListener(hoverEffect);
 
         clientsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         bookingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         signOutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        manageAccountsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Center panel to hold buttons
         JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -184,13 +195,15 @@ public class MainMenu extends JPanel {
         centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         centerPanel.add(bookingsButton);
         centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        centerPanel.add(manageAccountsButton);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         centerPanel.add(signOutButton);
         centerPanel.add(Box.createVerticalGlue());
 
+        // Button actions
         clientsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("client window");
                 clientWindow = new AddClientWindow();
                 clientWindow.setVisible(true);
             }
@@ -201,6 +214,18 @@ public class MainMenu extends JPanel {
                 frame.remove(MainMenu.this);
                 frame.add(bookingMenu);
                 scene.setScene("Booking");
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+        manageAccountsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(MainMenu.this);
+                if (manageAccountsPanel == null) {
+                    manageAccountsPanel = new ManageAccountsPanel(palette, frame, MainMenu.this);
+                }
+                frame.add(manageAccountsPanel);
                 frame.revalidate();
                 frame.repaint();
             }
@@ -234,10 +259,9 @@ public class MainMenu extends JPanel {
         settingsIconDark = new ImageIcon("src/assets/icons/settings_dark.png").getImage();
 
         Image scaledImage;
-
         if (palette.getIsDark()){
             scaledImage = settingsIconLight.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-        } else{
+        } else {
             scaledImage = settingsIconDark.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         }
         settingsButton.setIcon(new ImageIcon(scaledImage));
@@ -250,21 +274,21 @@ public class MainMenu extends JPanel {
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, fontSize));
     }
 
-
     private void updateButtonSizes() {
         int buttonWidth = pWidth / 4;
         int panelHeight = pHeight;
         int buttonHeight = (int)(panelHeight * 0.05);
-
         Dimension newButtonSize = new Dimension(buttonWidth, buttonHeight);
 
         clientsButton.setPreferredSize(newButtonSize);
         bookingsButton.setPreferredSize(newButtonSize);
         signOutButton.setPreferredSize(newButtonSize);
+        manageAccountsButton.setPreferredSize(newButtonSize);
 
         clientsButton.setMaximumSize(newButtonSize);
         bookingsButton.setMaximumSize(newButtonSize);
         signOutButton.setMaximumSize(newButtonSize);
+        manageAccountsButton.setMaximumSize(newButtonSize);
         frame.revalidate();
         frame.repaint();
     }
@@ -272,17 +296,14 @@ public class MainMenu extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (pWidth <= 0 || pHeight <= 0){
+        if (pWidth <= 0 || pHeight <= 0) {
             updateButtonSizes();
         }
         pWidth = getWidth();
         pHeight = getHeight();
-
         Graphics2D g2d = (Graphics2D) g;
-
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(palette.getBackground());
         g2d.fillRect(0, 0, getWidth(), getHeight());
-
     }
 }
