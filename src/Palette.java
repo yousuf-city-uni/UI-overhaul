@@ -42,8 +42,6 @@ public class Palette {
 
     private  Color red = new Color(250, 160, 160);
     private  Color amber = new Color(255, 250, 160);
-    //private  Color green = new Color(193, 225, 193);
-
 
     public Palette() {
     }

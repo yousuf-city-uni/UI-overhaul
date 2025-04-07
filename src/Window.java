@@ -37,7 +37,5 @@ public class Window {
         frame.setMinimumSize(new Dimension(1280, 720));
         frame.setSize(1280,720);
     }
-
-    //public static ColourPalette theme = new ColourPalette();
 }
 

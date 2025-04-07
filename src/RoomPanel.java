@@ -1,4 +1,3 @@
-// File: RoomPanel.java (Updated Class)
 import MarketingInterface.JDBC;
 import javax.swing.*;
 import java.awt.*;
@@ -11,37 +10,23 @@ public class RoomPanel extends JPanel {
     // UI components for room selection and details
     private JComboBox<String> roomCombo;
     private JTextArea roomDetailsArea;
-
-    public JLabel getSelectedDateLabel() {
-        return selectedDateLabel;
-    }
-
+    public JLabel getSelectedDateLabel() { return selectedDateLabel; }
     // Date selection components
     private JLabel selectedDateLabel;
     private JButton pickDateButton;
-
     // All-day checkbox
     private JCheckBox allDayCheckBox;
-
     // Time selection components
     private JComboBox<String> timeCombo;    // Start hour
-    private JComboBox<String> endHourCombo; // End hour
-
+    private JComboBox<String> endHourCombo;   // End hour
     // Client selection components
     private JLabel selectedClientLabel;
     private JButton selectClientButton;
     private int selectedClientId = -1;
-
     // Confirm booking button
     private JButton confirmButton;
-
     // Data storage
     private List<Venue> venues = new ArrayList<>();
-
-    public void setSelectedDate(String selectedDate) {
-        this.selectedDate = selectedDate;
-    }
-
     private String selectedDate = "";
     // Full list of possible hours.
     private final String[] hours = {
@@ -50,9 +35,14 @@ public class RoomPanel extends JPanel {
             "18:00", "19:00", "20:00", "21:00", "22:00"
     };
 
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+
     public RoomPanel() {
         setLayout(new BorderLayout(5, 5));
-
+        // Clear the venues list each time loadVenuesFromDatabase() is called.
+        venues.clear();
         loadVenuesFromDatabase();
 
         JPanel topPanel = new JPanel();
@@ -72,47 +62,42 @@ public class RoomPanel extends JPanel {
         roomDetailsArea.setEditable(false);
         roomDetailsArea.setLineWrap(true);
         roomDetailsArea.setWrapStyleWord(true);
-        // Instead of setting fixed sizes, let the text area determine its own size
-        roomDetailsArea.setColumns(1); // Suggest number of columns
-        roomDetailsArea.setRows(7);     // Suggest number of rows
-        roomDetailsArea.setBackground(Color.PINK); // Temporary to see bounds
+        roomDetailsArea.setColumns(1);
+        roomDetailsArea.setRows(7);
+        roomDetailsArea.setBackground(Color.PINK);
 
         if (!venues.isEmpty()) {
             updateRoomDetails(0);
         }
 
-// Ensure the panel has a layout manager
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS)); // Ensure BorderLayout for proper resizing
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.add(roomDetailsArea, BorderLayout.NORTH);
-
-// Add topPanel to the main container
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 1, 1)); // Reduced spacing
-
+        JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 1, 1));
         JPanel datePanel = new JPanel();
         selectedDateLabel = new JLabel("Selected Date: " + selectedDate);
         datePanel.add(selectedDateLabel);
         bottomPanel.add(datePanel);
 
         // All Day panel
-        JPanel allDayPanel = new JPanel(); // Reduced padding
+        JPanel allDayPanel = new JPanel();
         allDayCheckBox = new JCheckBox("All Day Booking");
         allDayCheckBox.addActionListener(e -> toggleAllDay());
         allDayPanel.add(allDayCheckBox);
         bottomPanel.add(allDayPanel);
 
         // Start Hour panel
-        JPanel startTimePanel = new JPanel(); // Reduced padding
+        JPanel startTimePanel = new JPanel();
         startTimePanel.add(new JLabel("Start Hour:"));
         timeCombo = new JComboBox<>(hours);
-        timeCombo.setSelectedIndex(-1); // no selection
+        timeCombo.setSelectedIndex(-1);
         timeCombo.addActionListener(e -> updateEndHourOptions());
         startTimePanel.add(timeCombo);
         bottomPanel.add(startTimePanel);
 
         // End Hour panel
-        JPanel endTimePanel = new JPanel(); // Reduced padding
+        JPanel endTimePanel = new JPanel();
         endTimePanel.add(new JLabel("End Hour:"));
         endHourCombo = new JComboBox<>();
         endHourCombo.setEnabled(false);
@@ -120,7 +105,7 @@ public class RoomPanel extends JPanel {
         bottomPanel.add(endTimePanel);
 
         // Client selection panel
-        JPanel clientPanel = new JPanel(); // Reduced padding
+        JPanel clientPanel = new JPanel();
         selectedClientLabel = new JLabel("Selected Client: None");
         selectClientButton = new JButton("Select Client");
         selectClientButton.setPreferredSize(new Dimension(150, 30));
@@ -130,7 +115,7 @@ public class RoomPanel extends JPanel {
         bottomPanel.add(clientPanel);
 
         // Confirm booking button panel
-        JPanel confirmPanel = new JPanel(); // Reduced padding
+        JPanel confirmPanel = new JPanel();
         confirmButton = new JButton("Confirm Booking");
         confirmButton.addActionListener(e -> performBooking());
         confirmPanel.add(confirmButton);
@@ -148,8 +133,9 @@ public class RoomPanel extends JPanel {
 
     // Load venues from the database
     private void loadVenuesFromDatabase() {
-        // Example: your table now has numeric columns for HourlyRate and AllDayRate
-        String sql = "SELECT VenueID, Name, Type, Capacity, SeatingConfiguration, HourlyRate, AllDayRate FROM Venues";
+        venues.clear();
+        String sql = "SELECT VenueID, Name, Type, Capacity, SeatingConfiguration, HourlyRate, AllDayRate " +
+                "FROM Venues WHERE VenueID NOT IN (9999, 101, 102, 103)";
         try (Connection conn = JDBC.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -160,7 +146,6 @@ public class RoomPanel extends JPanel {
                 v.setType(rs.getString("Type"));
                 v.setCapacity(rs.getInt("Capacity"));
                 v.setSeatingConfiguration(rs.getString("SeatingConfiguration"));
-                // We'll store the numeric rates in the Venue object
                 v.setHourlyRate(rs.getDouble("HourlyRate"));
                 v.setAllDayRate(rs.getDouble("AllDayRate"));
                 venues.add(v);
@@ -170,11 +155,10 @@ public class RoomPanel extends JPanel {
         }
     }
 
-    // Update the details area based on selected venue
+    // Update the details area based on selected venue.
     private void updateRoomDetails(int index) {
         if (index >= 0 && index < venues.size()) {
             Venue selectedVenue = venues.get(index);
-            // Show the numeric rates
             String details = selectedVenue.getName() + "\n" +
                     "Capacity: " + selectedVenue.getCapacity() + "\n" +
                     "Seating Config: " + selectedVenue.getSeatingConfiguration() + "\n" +
@@ -184,7 +168,7 @@ public class RoomPanel extends JPanel {
         }
     }
 
-    // Update end-hour options based on start-hour selection
+    // Update end-hour options based on start-hour selection.
     private void updateEndHourOptions() {
         int startIndex = timeCombo.getSelectedIndex();
         if (startIndex >= 0) {
@@ -200,7 +184,7 @@ public class RoomPanel extends JPanel {
         }
     }
 
-    // Open client selection dialog
+    // Open client selection dialog.
     private void openSelectClientDialog() {
         JFrame owner = (JFrame) SwingUtilities.getWindowAncestor(this);
         SelectClientDialog clientDialog = new SelectClientDialog(owner);
@@ -215,7 +199,7 @@ public class RoomPanel extends JPanel {
         }
     }
 
-    // Perform booking logic
+    // Perform booking logic.
     private void performBooking() {
         if (selectedDate.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a date.");
@@ -230,14 +214,10 @@ public class RoomPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please select a valid room.");
             return;
         }
-
         Venue selectedVenue = venues.get(index);
-
-        // If All Day is checked, use AllDayRate; otherwise multiply HourlyRate by duration
         boolean allDay = allDayCheckBox.isSelected();
         double basePrice = 0.0;
         String configDetails = "";
-
         if (allDay) {
             basePrice = selectedVenue.getAllDayRate();
             configDetails = "All Day Booking";
@@ -262,23 +242,20 @@ public class RoomPanel extends JPanel {
             basePrice = selectedVenue.getHourlyRate() * duration;
             configDetails = "StartHour: " + startHourStr + ", EndHour: " + endHourStr;
         }
-
         double vat = basePrice * 0.20; // 20% VAT
         double total = basePrice + vat;
-
         int bookingID = createBooking(
                 selectedClientId,
                 selectedDate,
                 selectedDate,
-                "Meeting",      // bookingType
-                "19",           // createdBy (staff ID)
+                "Meeting",
+                "19",
                 selectedVenue.getVenueID(),
                 configDetails,
                 basePrice,
                 vat,
                 total
         );
-
         if (bookingID > 0) {
             String receipt = "Booking Confirmed (ID: " + bookingID + "):\n" +
                     "Room: " + selectedVenue.getName() + "\n" +
@@ -290,12 +267,6 @@ public class RoomPanel extends JPanel {
         } else {
             JOptionPane.showMessageDialog(this, "Failed to insert booking.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    // Stub for room availability check
-    private boolean checkAvailability(String room, String date, int hour) {
-        // Implementation depends on your business logic
-        return true;
     }
 
     /**
@@ -319,33 +290,25 @@ public class RoomPanel extends JPanel {
         PreparedStatement stmtBookingVenues = null;
         PreparedStatement stmtInvoice = null;
         ResultSet generatedKeys = null;
-
         try {
             conn = JDBC.getConnection();
             conn.setAutoCommit(false);
-
-            String sqlBookings = "INSERT INTO Bookings (ClientID, StartDate, EndDate, BookingType, CreatedBy) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+            String sqlBookings = "INSERT INTO Bookings (ClientID, StartDate, EndDate, BookingType, CreatedBy) VALUES (?, ?, ?, ?, ?)";
             stmtBookings = conn.prepareStatement(sqlBookings, Statement.RETURN_GENERATED_KEYS);
-
-            // Convert dd/MM/yyyy to yyyy-MM-dd
             String[] startParts = startDateStr.split("/");
             String isoStart = startParts[2] + "-" + startParts[1] + "-" + startParts[0];
             String[] endParts = endDateStr.split("/");
             String isoEnd = endParts[2] + "-" + endParts[1] + "-" + endParts[0];
-
             stmtBookings.setInt(1, clientID);
             stmtBookings.setDate(2, java.sql.Date.valueOf(isoStart));
             stmtBookings.setDate(3, java.sql.Date.valueOf(isoEnd));
             stmtBookings.setString(4, bookingType);
             stmtBookings.setString(5, createdBy);
-
             int affectedRows = stmtBookings.executeUpdate();
             if (affectedRows == 0) {
                 conn.rollback();
                 return -1;
             }
-
             generatedKeys = stmtBookings.getGeneratedKeys();
             int newBookingID;
             if (generatedKeys.next()) {
@@ -356,42 +319,32 @@ public class RoomPanel extends JPanel {
             }
             generatedKeys.close();
             stmtBookings.close();
-
-            String sqlBookingVenues = "INSERT INTO Booking_Venues (BookingID, VenueID, ConfigurationDetails) " +
-                    "VALUES (?, ?, ?)";
+            String sqlBookingVenues = "INSERT INTO Booking_Venues (BookingID, VenueID, ConfigurationDetails) VALUES (?, ?, ?)";
             stmtBookingVenues = conn.prepareStatement(sqlBookingVenues);
             stmtBookingVenues.setInt(1, newBookingID);
             stmtBookingVenues.setInt(2, venueID);
             stmtBookingVenues.setString(3, configurationDetails);
-
             int affectedRows2 = stmtBookingVenues.executeUpdate();
             if (affectedRows2 == 0) {
                 conn.rollback();
                 return -1;
             }
             stmtBookingVenues.close();
-
-            // Insert into Invoices table
-            // Invoices table columns: InvoiceID, InvoiceDate, Costs, Total, BookingID, ClientID
-            String sqlInvoice = "INSERT INTO Invoices (InvoiceDate, Costs, Total, BookingID, ClientID) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+            String sqlInvoice = "INSERT INTO Invoices (InvoiceDate, Costs, Total, BookingID, ClientID) VALUES (?, ?, ?, ?, ?)";
             stmtInvoice = conn.prepareStatement(sqlInvoice);
             stmtInvoice.setDate(1, new java.sql.Date(System.currentTimeMillis()));
             stmtInvoice.setDouble(2, basePrice);
             stmtInvoice.setDouble(3, total);
             stmtInvoice.setInt(4, newBookingID);
             stmtInvoice.setInt(5, clientID);
-
             int affectedRows3 = stmtInvoice.executeUpdate();
             if (affectedRows3 == 0) {
                 conn.rollback();
                 return -1;
             }
             stmtInvoice.close();
-
             conn.commit();
             return newBookingID;
-
         } catch (SQLException e) {
             e.printStackTrace();
             if (conn != null) {
@@ -410,15 +363,8 @@ public class RoomPanel extends JPanel {
                 try {
                     conn.setAutoCommit(true);
                     conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                } catch (SQLException e) { e.printStackTrace(); }
             }
         }
     }
 }
-
-
-
-
-

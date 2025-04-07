@@ -2,16 +2,9 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Vector;
 import java.awt.event.*;
+import java.sql.*;
+import java.util.Vector;
 
 public class BookingMenu extends JPanel {
     private final JDBC jdbc;
@@ -48,11 +41,10 @@ public class BookingMenu extends JPanel {
         this.frame = frame;
         this.jdbc = jdbc;
 
-
         roomPanel = new RoomPanel();
         tourPanel = new TourPanel();
         showPanel = new ShowPanel();
-        calendar  = new CustomCalendar(receiver, roomPanel, showPanel, tourPanel);
+        calendar = new CustomCalendar(receiver, roomPanel, showPanel, tourPanel);
 
         this.setLayout(new BorderLayout());
 
@@ -62,7 +54,7 @@ public class BookingMenu extends JPanel {
         tabbedPane.setForeground(palette.getTextColor());
 
         headerLabel = new JLabel("Bookings", SwingConstants.CENTER);
-        headerLabel.setForeground(palette.getTextColor());
+        headerLabel.setForeground(Color.BLACK);
         headerLabel.setOpaque(false);
         adjustHeaderFont();
 
@@ -76,7 +68,6 @@ public class BookingMenu extends JPanel {
         headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JButton returnButton = new JButton("Menu");
-
         returnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,7 +78,6 @@ public class BookingMenu extends JPanel {
                 frame.repaint();
             }
         });
-
         headerPanel.add(returnButton, BorderLayout.WEST);
         headerPanel.add(headerLabel, BorderLayout.CENTER);
 
@@ -103,7 +93,6 @@ public class BookingMenu extends JPanel {
         cardPanel.add(roomPanel, "Room");
         cardPanel.add(tourPanel, "Tour");
         cardPanel.add(showPanel, "Show");
-
         bookingTypeCombo.addActionListener(e -> {
             String selected = (String) bookingTypeCombo.getSelectedItem();
             cardLayout.show(cardPanel, selected);
@@ -117,7 +106,6 @@ public class BookingMenu extends JPanel {
         addBookingPanel.add(bookingTypePanel, BorderLayout.NORTH);
         addBookingPanel.add(cardPanel, BorderLayout.CENTER);
 
-
         JPanel bookingRemove = new JPanel();
         JPanel removeBookingPanel = new JPanel(new BorderLayout());
         selectedDateLabel = new JLabel("Selected Date: " + selectedDate);
@@ -125,7 +113,6 @@ public class BookingMenu extends JPanel {
         tableModel = new DefaultTableModel(new Object[]{"BookingID", "Venue Name", "VenueID", "ClientID", "BookingType", "StartDate", "EndDate"}, 0);
         bookingTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(bookingTable);
-
         refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(e -> loadBookings());
         removeButton = new JButton("Remove Booking");
@@ -134,7 +121,6 @@ public class BookingMenu extends JPanel {
         bookingRemove.add(refreshButton);
         bookingRemove.add(removeButton);
         removeBookingPanel.add(bookingRemove);
-
 
         tabbedPane.addTab("Add Booking", addBookingPanel);
         tabbedPane.addTab("Remove Booking", removeBookingPanel);
@@ -167,7 +153,6 @@ public class BookingMenu extends JPanel {
         splitPane.setOpaque(true);
         splitPane.setBorder(null);
         splitPane.setContinuousLayout(true);
-
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -175,7 +160,6 @@ public class BookingMenu extends JPanel {
                 splitPane.setDividerLocation(totalWidth / 2);
             }
         });
-
         this.add(splitPane, BorderLayout.CENTER);
     }
 
@@ -216,14 +200,15 @@ public class BookingMenu extends JPanel {
         }
     }
 
+    // UPDATED loadBookings() method: filter out tours (BookingType = 'Tour')
     private void loadBookings() {
         tableModel.setRowCount(0);
         String sql;
         if (selectedDate.isEmpty()) {
             sql = "SELECT b.BookingID, v.Name as VenueName, v.VenueID, b.ClientID, b.BookingType, b.StartDate, b.EndDate " +
                     "FROM Bookings b " +
-                    "JOIN Booking_Venues bv ON b.BookingID = bv.BookingID " +
-                    "JOIN Venues v ON bv.VenueID = v.VenueID " +
+                    "LEFT JOIN Booking_Venues bv ON b.BookingID = bv.BookingID " +
+                    "LEFT JOIN Venues v ON bv.VenueID = v.VenueID " +
                     "WHERE b.StartDate >= CURDATE() " +
                     "ORDER BY b.StartDate";
         } else {
@@ -231,8 +216,8 @@ public class BookingMenu extends JPanel {
             String isoDate = parts[2] + "-" + parts[1] + "-" + parts[0];
             sql = "SELECT b.BookingID, v.Name as VenueName, v.VenueID, b.ClientID, b.BookingType, b.StartDate, b.EndDate " +
                     "FROM Bookings b " +
-                    "JOIN Booking_Venues bv ON b.BookingID = bv.BookingID " +
-                    "JOIN Venues v ON bv.VenueID = v.VenueID " +
+                    "LEFT JOIN Booking_Venues bv ON b.BookingID = bv.BookingID " +
+                    "LEFT JOIN Venues v ON bv.VenueID = v.VenueID " +
                     "WHERE b.StartDate = ? AND b.StartDate >= CURDATE() " +
                     "ORDER BY b.StartDate";
         }
@@ -273,14 +258,21 @@ public class BookingMenu extends JPanel {
         try (Connection conn = jdbc.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Delete from Invoices first (child table)
+            // Delete from Invoices (child table)
             String deleteInvoices = "DELETE FROM Invoices WHERE BookingID = ?";
             try (PreparedStatement psInv = conn.prepareStatement(deleteInvoices)) {
                 psInv.setInt(1, bookingID);
                 psInv.executeUpdate();
             }
 
-            // Then delete from Booking_Venues
+            // Delete from Shows (child table)
+            String deleteShows = "DELETE FROM Shows WHERE BookingID = ?";
+            try (PreparedStatement psShows = conn.prepareStatement(deleteShows)) {
+                psShows.setInt(1, bookingID);
+                psShows.executeUpdate();
+            }
+
+            // Delete from Booking_Venues (child table)
             String deleteBookingVenues = "DELETE FROM Booking_Venues WHERE BookingID = ?";
             try (PreparedStatement psBV = conn.prepareStatement(deleteBookingVenues)) {
                 psBV.setInt(1, bookingID);

@@ -18,6 +18,7 @@ public class TourPanel extends JPanel {
 
     public void setSelectedDate(String selectedDate) {
         this.selectedDate = selectedDate;
+        dateLabel.setText("Tour Date: " + selectedDate);
     }
 
     public TourPanel() {
@@ -35,7 +36,7 @@ public class TourPanel extends JPanel {
         participantsField = new JTextField(5);
         add(participantsField);
 
-        // OrganisedBy (Staff)
+        // Organised By (Staff)
         add(new JLabel("Organised By (Staff):"));
         organisedByLabel = new JLabel("None");
         selectOrganiserButton = new JButton("Select Organiser");
@@ -43,11 +44,8 @@ public class TourPanel extends JPanel {
         add(organisedByLabel);
         add(selectOrganiserButton);
 
-        // Tour date
         dateLabel = new JLabel("Tour Date: Not Selected");
-        //pickDateButton = new JButton("Pick Tour Date");
         add(dateLabel);
-        //add(pickDateButton);
 
         // Confirm booking
         confirmTourButton = new JButton("Confirm Tour");
@@ -73,7 +71,8 @@ public class TourPanel extends JPanel {
     }
 
     /**
-     * Validates fields and inserts a row into the Tours table if valid.
+     * Validates input and creates a tour booking by inserting into the Bookings, Tours,
+     * and Booking_Venues tables.
      */
     private void confirmTour() {
         String institution = institutionField.getText().trim();
@@ -84,7 +83,7 @@ public class TourPanel extends JPanel {
             return;
         }
         if (selectedDate.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please pick a tour date.");
+            JOptionPane.showMessageDialog(this, "Please select a tour date from the calendar.");
             return;
         }
         int participants;
@@ -98,68 +97,141 @@ public class TourPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please select a staff member to organise the tour.");
             return;
         }
-
-        // (Optional) check if date is valid or available
         if (!checkTourAvailability(selectedDate)) {
             JOptionPane.showMessageDialog(this, "Tour date not available or invalid.");
             return;
         }
 
-        // Insert into Tours
-        insertTour(institution, selectedDate, participants, organiserStaffID);
-    }
-
-    /**
-     * Stub method to check if the selected date is valid or available.
-     */
-    private boolean checkTourAvailability(String dateStr) {
-        // For now, always return true. You can add real logic here.
-        return true;
-    }
-
-    /**
-     * Inserts a row into the Tours table.
-     * We convert dd/MM/yyyy to yyyy-MM-dd before storing.
-     */
-    private void insertTour(String institution, String dateStr, int participants, int organiser) {
-        // Convert dd/MM/yyyy -> yyyy-MM-dd
-        String[] parts = dateStr.split("/");
-        String isoDate = parts[2] + "-" + parts[1] + "-" + parts[0];
-
-        String sql = "INSERT INTO Tours (InstitutionName, TourDate, NumberOfParticipants, OrganisedBy) " +
-                "VALUES (?, ?, ?, ?)";
-        try (Connection conn = JDBC.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, institution);
-            stmt.setDate(2, java.sql.Date.valueOf(isoDate));
-            stmt.setInt(3, participants);
-            stmt.setInt(4, organiser);
-
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows > 0) {
-                try (ResultSet keys = stmt.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        int newTourID = keys.getInt(1);
-                        JOptionPane.showMessageDialog(this,
-                                "Tour booked successfully!\nTourID = " + newTourID);
-                        resetFields();
-                    }
-                }
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to book tour.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Error booking tour:\n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+        int bookingID = createTourBooking(institution, selectedDate, participants, organiserStaffID);
+        if (bookingID > 0) {
+            JOptionPane.showMessageDialog(this, "Tour booked successfully!\nBookingID = " + bookingID);
+            resetFields();
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to book tour.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
-     * Resets the form fields after successful insert.
+     * Stub method to check if the selected date is available.
+     */
+    private boolean checkTourAvailability(String dateStr) {
+        // For now, always return true. Implement real logic as needed.
+        return true;
+    }
+
+    /**
+     * Inserts a new tour booking into the Bookings, Tours, and Booking_Venues tables.
+     * Assumes selectedDate is in dd/MM/yyyy format and converts it to ISO format ("yyyy-MM-dd").
+     * Returns the new BookingID or -1 if insertion fails.
+     */
+    private int createTourBooking(String institution, String dateStr, int participants, int organiser) {
+        Connection conn = null;
+        PreparedStatement stmtBookings = null;
+        PreparedStatement stmtTours = null;
+        PreparedStatement stmtBookingVenues = null;
+        ResultSet generatedKeys = null;
+        try {
+            conn = JDBC.getConnection();
+            conn.setAutoCommit(false);
+
+            // Convert dd/MM/yyyy to ISO format "yyyy-MM-dd"
+            String[] parts = dateStr.split("/");
+            if (parts.length != 3) return -1;
+            // Trim each part in case there are extra spaces
+            String day = parts[0].trim();
+            String month = parts[1].trim();
+            String year = parts[2].trim();
+            String isoDate = year + "-" + month + "-" + day;
+
+            // Insert into Bookings table with BookingType = 'Tour'
+            // Use a dummy ClientID (e.g., 1) that exists in the Clients table.
+            String sqlBookings = "INSERT INTO Bookings (ClientID, StartDate, EndDate, BookingType, CreatedBy) " +
+                    "VALUES (?, ?, ?, 'Tour', ?)";
+            stmtBookings = conn.prepareStatement(sqlBookings, Statement.RETURN_GENERATED_KEYS);
+            stmtBookings.setInt(1, 1);  // Dummy ClientID; ensure a Client with ID 1 exists
+            stmtBookings.setDate(2, java.sql.Date.valueOf(isoDate));
+            stmtBookings.setDate(3, java.sql.Date.valueOf(isoDate));
+            stmtBookings.setInt(4, organiser);
+
+            int affectedRows = stmtBookings.executeUpdate();
+            if (affectedRows == 0) {
+                conn.rollback();
+                return -1;
+            }
+            generatedKeys = stmtBookings.getGeneratedKeys();
+            int newBookingID;
+            if (generatedKeys.next()) {
+                newBookingID = generatedKeys.getInt(1);
+            } else {
+                conn.rollback();
+                return -1;
+            }
+            generatedKeys.close();
+            stmtBookings.close();
+
+            // Insert into Tours table with the new BookingID
+            String sqlTours = "INSERT INTO Tours (InstitutionName, TourDate, NumberOfParticipants, OrganisedBy, BookingID) " +
+                    "VALUES (?, ?, ?, ?, ?)";
+            stmtTours = conn.prepareStatement(sqlTours);
+            stmtTours.setString(1, institution);
+            stmtTours.setDate(2, java.sql.Date.valueOf(isoDate));
+            stmtTours.setInt(3, participants);
+            stmtTours.setInt(4, organiser);
+            stmtTours.setInt(5, newBookingID);
+
+            affectedRows = stmtTours.executeUpdate();
+            if (affectedRows == 0) {
+                conn.rollback();
+                return -1;
+            }
+            stmtTours.close();
+
+            // Insert into Booking_Venues with default values for tours:
+            // Use dummy VenueID = 9999 and ConfigurationDetails = "LMH"
+            String sqlBookingVenues = "INSERT INTO Booking_Venues (BookingID, VenueID, ConfigurationDetails) VALUES (?, ?, ?)";
+            stmtBookingVenues = conn.prepareStatement(sqlBookingVenues);
+            stmtBookingVenues.setInt(1, newBookingID);
+            stmtBookingVenues.setInt(2, 9999); // Use dummy VenueID 9999 for tours
+            stmtBookingVenues.setString(3, "LMH"); // Default configuration details "LMH"
+            affectedRows = stmtBookingVenues.executeUpdate();
+            if (affectedRows == 0) {
+                conn.rollback();
+                return -1;
+            }
+            stmtBookingVenues.close();
+
+            conn.commit();
+            return newBookingID;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            return -1;
+        } finally {
+            if (generatedKeys != null) {
+                try { generatedKeys.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (stmtBookings != null) {
+                try { stmtBookings.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (stmtTours != null) {
+                try { stmtTours.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (stmtBookingVenues != null) {
+                try { stmtBookingVenues.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
+
+    /**
+     * Resets the form fields after a successful booking.
      */
     private void resetFields() {
         institutionField.setText("");
@@ -170,5 +242,3 @@ public class TourPanel extends JPanel {
         dateLabel.setText("Tour Date: Not Selected");
     }
 }
-
-

@@ -38,13 +38,13 @@ public class ManageAccountsPanel extends JPanel {
         setBackground(palette.getBackground());
 
         tabbedPane = new JTabbedPane();
-        // Set a custom UI for the tabbed pane so the tabs are easier to see
         tabbedPane.setUI(new CustomTabbedPaneUI(palette));
 
         // Create tabs
         JPanel clientManagementPanel = createClientManagementPanel();
         JPanel friendsManagementPanel = createFriendsManagementPanel();
 
+        tabbedPane.setForeground(Color.WHITE);
         tabbedPane.addTab("Client Management", clientManagementPanel);
         tabbedPane.addTab("Friends of Lancaster", friendsManagementPanel);
 
@@ -62,8 +62,6 @@ public class ManageAccountsPanel extends JPanel {
         loadClientsData();
         loadFriendsData();
     }
-
-    // ----------------- Client Management -----------------
 
     private JPanel createClientManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -183,7 +181,6 @@ public class ManageAccountsPanel extends JPanel {
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
-            // Check if error is due to foreign key constraint violation (MySQL error code 1451)
             if (e.getErrorCode() == 1451) {
                 // Show a user-friendly message
                 JOptionPane.showMessageDialog(this,
@@ -198,8 +195,6 @@ public class ManageAccountsPanel extends JPanel {
             }
         }
     }
-
-    // ----------------- Friends of Lancaster Management -----------------
 
     private JPanel createFriendsManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -364,8 +359,6 @@ public class ManageAccountsPanel extends JPanel {
         }
     }
 
-    // ----------------- Navigation -----------------
-
     private void goBack() {
         frame.remove(this);
         frame.add(mainMenu);
@@ -380,8 +373,6 @@ public class ManageAccountsPanel extends JPanel {
         g.fillRect(0, 0, getWidth(), getHeight());
     }
 
-    // ----------------- Custom TabbedPane UI -----------------
-    // This inner class customizes the look of the tab buttons.
     private class CustomTabbedPaneUI extends BasicTabbedPaneUI {
         private Palette palette;
         public CustomTabbedPaneUI(Palette palette) {

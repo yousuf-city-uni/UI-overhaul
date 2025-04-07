@@ -32,15 +32,15 @@ public class ShowPanel extends JPanel {
     public ShowPanel() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);  // Reduced padding from 5 to 2
-        gbc.anchor = GridBagConstraints.LINE_END;  // Labels will align to the right edge
+        gbc.insets = new Insets(2, 2, 2, 2);
+        gbc.anchor = GridBagConstraints.LINE_END;
 
         // Movie Title Row
         gbc.gridx = 0; gbc.gridy = 0;
         add(new JLabel("Movie Title:"), gbc);
 
         gbc.gridx = 1; gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.LINE_START;  // Inputs align to left edge
+        gbc.anchor = GridBagConstraints.LINE_START;
         movieTitleField = new JTextField(20);
         add(movieTitleField, gbc);
 
@@ -66,7 +66,7 @@ public class ShowPanel extends JPanel {
         dateLabel = new JLabel("Not Selected");
         pickDateButton = new JButton("Pick Date");
         datePanel.add(dateLabel);
-        datePanel.add(Box.createHorizontalStrut(5));  // Reduced from 10 to 5
+        datePanel.add(Box.createHorizontalStrut(5));
         datePanel.add(pickDateButton);
         add(datePanel, gbc);
 
@@ -107,7 +107,7 @@ public class ShowPanel extends JPanel {
         selectClientButton = new JButton("Select Client");
         selectClientButton.addActionListener(e -> selectClient());
         clientPanel.add(selectedClientLabel);
-        clientPanel.add(Box.createHorizontalStrut(5));  // Reduced from 10 to 5
+        clientPanel.add(Box.createHorizontalStrut(5));
         clientPanel.add(selectClientButton);
         add(clientPanel, gbc);
 
@@ -187,22 +187,22 @@ public class ShowPanel extends JPanel {
             return;
         }
         int venueIndex = venueCombo.getSelectedIndex();
-        int venueID = venueIDs[venueIndex];
-
-        // Build configuration details (if needed)
+        int venueID = venueIDs[venueIndex];  // from your predefined array in ShowPanel
         String configurationDetails = "StartTime: " + startTime + ", EndTime: " + endTime;
 
-        // Call createShowBooking to insert into the database.
         int bookingID = createShowBooking(
-                selectedClientId,
-                movieTitle,
-                "Film",              // showType
-                selectedDate,
-                startTime,           // We'll use startTime as the show time
-                "Show",              // bookingType
-                19,                  // createdBy staff ID (example)
-                configurationDetails // marketing notes or configuration details
+                selectedClientId,       // clientID
+                movieTitle,             // title
+                "Film",                 // showType
+                selectedDate,           // showDateStr (dd/MM/yyyy)
+                startTime,              // showTimeStr ("HH:mm")
+                "Show",                 // bookingType
+                19,                     // createdByStaffID (example)
+                configurationDetails,   // marketingNotes
+                venueID,                // venueID (new parameter)
+                configurationDetails    // configurationDetails (new parameter)
         );
+
 
         if (bookingID > 0) {
             String receipt = "Show Booking Confirmed (BookingID: " + bookingID + "):\n" +
@@ -235,6 +235,11 @@ public class ShowPanel extends JPanel {
      * Dates are provided in dd/MM/yyyy format.
      * showTimeStr is provided as "HH:mm".
      */
+    /**
+     * Inserts a new show booking by inserting into the Bookings, Shows, and Booking_Venues tables.
+     * Dates are provided in dd/MM/yyyy format.
+     * showTimeStr is provided as "HH:mm".
+     */
     private int createShowBooking(
             int clientID,
             String title,
@@ -243,11 +248,14 @@ public class ShowPanel extends JPanel {
             String showTimeStr,
             String bookingType,
             int createdByStaffID,
-            String marketingNotes
+            String marketingNotes,
+            int venueID,                   // Add venueID parameter (from venueCombo)
+            String configurationDetails    // Optional, e.g. configuration details from the UI
     ) {
         Connection conn = null;
         PreparedStatement stmtBookings = null;
         PreparedStatement stmtShows = null;
+        PreparedStatement stmtBookingVenues = null;
         ResultSet generatedKeys = null;
         try {
             conn = JDBC.getConnection();
@@ -283,6 +291,7 @@ public class ShowPanel extends JPanel {
                 return -1;
             }
             generatedKeys.close();
+            stmtBookings.close();
 
             // 2) Insert into Shows table with the new BookingID.
             String sqlShows = "INSERT INTO Shows (BookingID, Title, ShowType, ShowDate, ShowTime, MarketingNotes) VALUES (?, ?, ?, ?, ?, ?)";
@@ -300,32 +309,50 @@ public class ShowPanel extends JPanel {
                 conn.rollback();
                 return -1;
             }
+            stmtShows.close();
+
+            // 3) Insert into Booking_Venues to store the selected venue for the show.
+            String sqlBookingVenues = "INSERT INTO Booking_Venues (BookingID, VenueID, ConfigurationDetails) VALUES (?, ?, ?)";
+            stmtBookingVenues = conn.prepareStatement(sqlBookingVenues);
+            stmtBookingVenues.setInt(1, newBookingID);
+            stmtBookingVenues.setInt(2, venueID);  // Venue ID from the venueCombo in ShowPanel
+            stmtBookingVenues.setString(3, configurationDetails);
+            affectedRows = stmtBookingVenues.executeUpdate();
+            if (affectedRows == 0) {
+                conn.rollback();
+                return -1;
+            }
+            stmtBookingVenues.close();
 
             conn.commit();
             return newBookingID;
         } catch (SQLException e) {
             e.printStackTrace();
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
             return -1;
         } finally {
             if (generatedKeys != null) {
-                try { generatedKeys.close(); } catch (SQLException e) { e.printStackTrace(); }
-            }
-            if (stmtBookings != null) {
-                try { stmtBookings.close(); } catch (SQLException e) { e.printStackTrace(); }
-            }
-            if (stmtShows != null) {
-                try { stmtShows.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try {
+                    generatedKeys.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
                     conn.close();
-                } catch (SQLException e) { e.printStackTrace(); }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
-}
+    }}
+
 

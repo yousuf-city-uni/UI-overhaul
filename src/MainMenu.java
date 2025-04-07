@@ -20,7 +20,7 @@ public class MainMenu extends JPanel {
     private int pWidth = 1280;
     private int pHeight = 720;
     private AddClientWindow clientWindow;
-    private ManageAccountsPanel manageAccountsPanel; // New management panel
+    private ManageAccountsPanel manageAccountsPanel;
 
     private boolean isSignedOut = false;
     public boolean isSignedOut() {
@@ -40,7 +40,7 @@ public class MainMenu extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // Settings icon initialization
+        // Settings icon
         settingsIconLight = new ImageIcon("src/assets/icons/settings_light.png").getImage();
         settingsIconDark = new ImageIcon("src/assets/icons/settings_dark.png").getImage();
         Image scaledImage;
@@ -125,7 +125,7 @@ public class MainMenu extends JPanel {
             }
         });
 
-        // Main buttons initialization
+        // Main buttons
         clientsButton = new JButton("Add Client");
         bookingsButton = new JButton("Bookings");
         signOutButton = new JButton("Sign Out");

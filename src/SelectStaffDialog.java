@@ -79,7 +79,7 @@ public class SelectStaffDialog extends JDialog {
 
         @Override
         public String toString() {
-            // For example: "102 - Alice Johnson (Manager)"
+            // "102 - Alice Johnson (Manager)"
             return staffId + " - " + name + " (" + role + ")";
         }
     }

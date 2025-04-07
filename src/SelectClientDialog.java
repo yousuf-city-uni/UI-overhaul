@@ -15,7 +15,6 @@ public class SelectClientDialog extends JDialog {
         setSize(600, 400);
         setLocationRelativeTo(owner);
 
-        // Single column: "Client Info"
         tableModel = new DefaultTableModel(new Object[]{"Client Info"}, 0);
         clientTable = new JTable(tableModel);
 
