@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class JDBC{
     private static final String URL = "jdbc:mysql://sst-stuproj.city.ac.uk:3306/in2033t30?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "in2033t30_d";
-    private static final String PASSWORD = "yIxb1LGjdSg";
+    private static final String USER = "in2033t30_a";
+    private static final String PASSWORD = "v2Z-FYZV6Sg";
 
     static {
         try {
