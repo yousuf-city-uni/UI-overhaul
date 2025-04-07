@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import java.time.LocalDate;
 
 public class AddClientWindow extends JFrame {
     private JTextField nameField;
@@ -10,11 +11,12 @@ public class AddClientWindow extends JFrame {
     private JTextField typeField;
     private JTextField addressField;
     private JTextField emailField;
+    private JCheckBox friendsOfLancasterCheckBox;
     private JButton createButton;
 
     public AddClientWindow() {
         super("Add New Client");
-        setSize(400, 300);
+        setSize(400, 350);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 2, 10, 10));
@@ -40,6 +42,11 @@ public class AddClientWindow extends JFrame {
         emailField = new JTextField();
         add(emailField);
 
+        // Friends of Lancaster checkbox
+        add(new JLabel("Friends of Lancaster:"));
+        friendsOfLancasterCheckBox = new JCheckBox("Yes");
+        add(friendsOfLancasterCheckBox);
+
         // Create button
         createButton = new JButton("Create Client");
         createButton.addActionListener(e -> createClient());
@@ -64,7 +71,8 @@ public class AddClientWindow extends JFrame {
         // Insert into Clients table
         String sql = "INSERT INTO Clients (Name, ContactInfo, ClientType, Address, Email) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = JDBC.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, name);
             stmt.setString(2, contact);
             stmt.setString(3, clientType);
@@ -73,6 +81,17 @@ public class AddClientWindow extends JFrame {
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
+                // Optionally retrieve the generated ClientID if needed
+                // ResultSet rs = stmt.getGeneratedKeys();
+                // if (rs.next()) {
+                //     int newClientId = rs.getInt(1);
+                // }
+
+                // If the Friends of Lancaster checkbox is selected, also insert into FriendsOfLancasters
+                if (friendsOfLancasterCheckBox.isSelected()) {
+                    insertIntoFriendsOfLancaster(conn, name, email);
+                }
+
                 JOptionPane.showMessageDialog(this, "Client created successfully!");
                 dispose();  // close this window
             } else {
@@ -81,6 +100,20 @@ public class AddClientWindow extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error inserting client:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void insertIntoFriendsOfLancaster(Connection conn, String name, String email) throws SQLException {
+        // Example: set SubscriptionStatus = 'Active' and PriorityAccessStartDate = today
+        String sqlFoL = "INSERT INTO FriendsOfLancasters (Name, Email, SubscriptionStatus, PriorityAccessStartDate) "
+                + "VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sqlFoL)) {
+            stmt.setString(1, name);
+            stmt.setString(2, email);
+            stmt.setString(3, "Active"); // or retrieve from a field if needed
+            stmt.setDate(4, Date.valueOf(LocalDate.now())); // today's date
+            stmt.executeUpdate();
         }
     }
 }
