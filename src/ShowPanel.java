@@ -6,8 +6,8 @@ import java.sql.*;
 
 public class ShowPanel extends JPanel {
     private JTextField movieTitleField;
-    private JComboBox<String> venueCombo; // For venue selection
-    private int[] venueIDs = {101, 102, 103}; // Example venue IDs; replace with real data if available
+    private JComboBox<String> venueCombo;
+    private int[] venueIDs = {101, 102, 103};
     private String[] venueNames = {"Main Hall", "Small Hall", "Rehearsal Space"};
 
     private JLabel dateLabel;
@@ -27,55 +27,98 @@ public class ShowPanel extends JPanel {
             "18:00", "19:00", "20:00", "21:00", "22:00" };
 
     public ShowPanel() {
-        setLayout(new GridLayout(0, 2, 10, 10));
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(2, 2, 2, 2);  // Reduced padding from 5 to 2
+        gbc.anchor = GridBagConstraints.LINE_END;  // Labels will align to the right edge
 
-        // Movie Title
-        add(new JLabel("Movie Title:"));
-        movieTitleField = new JTextField();
-        add(movieTitleField);
+        // Movie Title Row
+        gbc.gridx = 0; gbc.gridy = 0;
+        add(new JLabel("Movie Title:"), gbc);
 
-        // Venue Selection
-        add(new JLabel("Venue:"));
+        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.LINE_START;  // Inputs align to left edge
+        movieTitleField = new JTextField(20);
+        add(movieTitleField, gbc);
+
+        // Venue Selection Row
+        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel("Venue:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
         venueCombo = new JComboBox<>(venueNames);
-        add(venueCombo);
+        venueCombo.setPrototypeDisplayValue("Rehearsal Space");
+        add(venueCombo, gbc);
 
-        // Show Date
-        add(new JLabel("Show Date:"));
-        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // Show Date Row
+        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel("Show Date:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         dateLabel = new JLabel("Not Selected");
         pickDateButton = new JButton("Pick Date");
         datePanel.add(dateLabel);
+        datePanel.add(Box.createHorizontalStrut(5));  // Reduced from 10 to 5
         datePanel.add(pickDateButton);
-        add(datePanel);
+        add(datePanel, gbc);
 
-        // Start Time
-        add(new JLabel("Start Time:"));
+        // Start Time Row
+        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel("Start Time:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.LINE_START;
         startTimeCombo = new JComboBox<>(hours);
         startTimeCombo.setSelectedIndex(-1);
+        startTimeCombo.setPrototypeDisplayValue("22:00");
         startTimeCombo.addActionListener(e -> updateEndTimeOptions());
-        add(startTimeCombo);
+        add(startTimeCombo, gbc);
 
-        // End Time
-        add(new JLabel("End Time:"));
+        // End Time Row
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel("End Time:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.LINE_START;
         endTimeCombo = new JComboBox<>();
         endTimeCombo.setEnabled(false);
-        add(endTimeCombo);
+        endTimeCombo.setPrototypeDisplayValue("22:00");
+        add(endTimeCombo, gbc);
 
-        // Client selection
-        add(new JLabel("Client:"));
-        JPanel clientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // Client Selection Row
+        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel("Client:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        JPanel clientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         selectedClientLabel = new JLabel("None");
         selectClientButton = new JButton("Select Client");
         selectClientButton.addActionListener(e -> selectClient());
         clientPanel.add(selectedClientLabel);
+        clientPanel.add(Box.createHorizontalStrut(5));  // Reduced from 10 to 5
         clientPanel.add(selectClientButton);
-        add(clientPanel);
+        add(clientPanel, gbc);
 
-        // Confirm Button (spanning two columns)
-        add(new JLabel()); // filler
+        // Confirm Button Row
+        gbc.gridx = 0; gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         confirmShowButton = new JButton("Confirm Show Booking");
         confirmShowButton.addActionListener(e -> confirmShowBooking());
-        add(confirmShowButton);
+        add(confirmShowButton, gbc);
+
+        // Reset constraints for any future additions
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.LINE_END;
     }
 
     // Updates the endTimeCombo so that only times equal to or after the selected start time are available.

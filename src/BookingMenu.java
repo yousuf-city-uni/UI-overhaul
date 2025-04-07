@@ -33,23 +33,25 @@ public class BookingMenu extends JPanel {
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setOpaque(false);
+
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.setOpaque(false);
         headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        leftPanel.add(headerLabel);
+        headerPanel.add(headerLabel, BorderLayout.CENTER);
 
-        JPanel addBooking = new JPanel();
-        bookingTypeCombo = new JComboBox<>(new String[]{"Room", "Tour", "Show"});
+        JPanel bookingTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bookingTypePanel.setOpaque(false);
         JLabel bookingTypeLabel = new JLabel("Booking Type:");
-
-        addBooking.add(bookingTypeLabel);
-        addBooking.add(bookingTypeCombo);
+        bookingTypeCombo = new JComboBox<>(new String[]{"Room", "Tour", "Show"});
+        bookingTypePanel.add(bookingTypeLabel);
+        bookingTypePanel.add(bookingTypeCombo);
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
-
         roomPanel = new RoomPanel();
         tourPanel = new TourPanel();
         showPanel = new ShowPanel();
-
         cardPanel.add(roomPanel, "Room");
         cardPanel.add(tourPanel, "Tour");
         cardPanel.add(showPanel, "Show");
@@ -59,9 +61,19 @@ public class BookingMenu extends JPanel {
             cardLayout.show(cardPanel, selected);
         });
 
-        addBooking.add(cardPanel);
-        tabbedPane.addTab("Add Booking", addBooking);
-        leftPanel.add(tabbedPane, BorderLayout.SOUTH);
+        JPanel tabbedPaneContainer = new JPanel(new BorderLayout());
+        tabbedPaneContainer.setOpaque(false);
+
+        JPanel addBookingPanel = new JPanel(new BorderLayout());
+        addBookingPanel.setOpaque(false);
+        addBookingPanel.add(bookingTypePanel, BorderLayout.NORTH);
+        addBookingPanel.add(cardPanel, BorderLayout.CENTER);
+
+        tabbedPane.addTab("Add Booking", addBookingPanel);
+        tabbedPaneContainer.add(tabbedPane, BorderLayout.CENTER);
+
+        leftPanel.add(headerPanel);
+        leftPanel.add(tabbedPaneContainer);
 
         JPanel rightPanel = new JPanel() {
             @Override
@@ -79,15 +91,12 @@ public class BookingMenu extends JPanel {
         rightPanel.setLayout(new BorderLayout());
         rightPanel.add(calendar, BorderLayout.CENTER);
 
-
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         splitPane.setResizeWeight(0.5);
         splitPane.setDividerSize(0);
         splitPane.setOpaque(true);
         splitPane.setBorder(null);
         splitPane.setContinuousLayout(true);
-
-        this.add(splitPane, BorderLayout.CENTER);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override

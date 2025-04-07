@@ -46,13 +46,12 @@ public class RoomPanel extends JPanel {
 
         loadVenuesFromDatabase();
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel roomSelectionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 0)); // Reduced padding
+        JPanel topPanel = new JPanel();
+        JPanel roomSelectionPanel = new JPanel();
         roomSelectionPanel.add(new JLabel("Select Room:"));
 
         String[] venueNames = venues.stream().map(Venue::getName).toArray(String[]::new);
         roomCombo = new JComboBox<>(venueNames);
-        roomCombo.setPreferredSize(new Dimension(50, 30));
         roomCombo.addActionListener(e -> updateRoomDetails(roomCombo.getSelectedIndex()));
         roomSelectionPanel.add(roomCombo);
 
@@ -63,12 +62,20 @@ public class RoomPanel extends JPanel {
         roomDetailsArea.setEditable(false);
         roomDetailsArea.setLineWrap(true);
         roomDetailsArea.setWrapStyleWord(true);
-        roomDetailsArea.setPreferredSize(new Dimension(60, 100)); // Limit the size of the text area
-        roomDetailsArea.setMaximumSize(new Dimension(70, Integer.MAX_VALUE)); // Don't let it expand too much
+        // Instead of setting fixed sizes, let the text area determine its own size
+        roomDetailsArea.setColumns(1); // Suggest number of columns
+        roomDetailsArea.setRows(7);     // Suggest number of rows
+        roomDetailsArea.setBackground(Color.PINK); // Temporary to see bounds
+
         if (!venues.isEmpty()) {
             updateRoomDetails(0);
         }
-        topPanel.add(new JScrollPane(roomDetailsArea), BorderLayout.CENTER);
+
+// Ensure the panel has a layout manager
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS)); // Ensure BorderLayout for proper resizing
+        topPanel.add(roomDetailsArea, BorderLayout.NORTH);
+
+// Add topPanel to the main container
         add(topPanel, BorderLayout.NORTH);
 
         JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 1, 1)); // Reduced spacing

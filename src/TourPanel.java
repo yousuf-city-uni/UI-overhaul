@@ -17,7 +17,7 @@ public class TourPanel extends JPanel {
     private int organiserStaffID = -1;
 
     public TourPanel() {
-        setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(new JLabel("Tour Booking:"));
 
