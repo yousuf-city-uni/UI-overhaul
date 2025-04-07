@@ -117,20 +117,23 @@ public class BookingMenu extends JPanel {
         addBookingPanel.add(bookingTypePanel, BorderLayout.NORTH);
         addBookingPanel.add(cardPanel, BorderLayout.CENTER);
 
+
+        JPanel bookingRemove = new JPanel();
         JPanel removeBookingPanel = new JPanel(new BorderLayout());
         selectedDateLabel = new JLabel("Selected Date: " + selectedDate);
         removeBookingPanel.add(selectedDateLabel);
         tableModel = new DefaultTableModel(new Object[]{"BookingID", "Venue Name", "VenueID", "ClientID", "BookingType", "StartDate", "EndDate"}, 0);
         bookingTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(bookingTable);
-        removeBookingPanel.add(scrollPane, BorderLayout.CENTER);
 
         refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(e -> loadBookings());
         removeButton = new JButton("Remove Booking");
         removeButton.addActionListener(e -> removeSelectedBooking());
-        removeBookingPanel.add(refreshButton);
-        removeBookingPanel.add(removeButton);
+        bookingRemove.add(scrollPane, BorderLayout.CENTER);
+        bookingRemove.add(refreshButton);
+        bookingRemove.add(removeButton);
+        removeBookingPanel.add(bookingRemove);
 
 
         tabbedPane.addTab("Add Booking", addBookingPanel);
