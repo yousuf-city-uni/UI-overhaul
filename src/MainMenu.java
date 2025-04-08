@@ -41,8 +41,8 @@ public class MainMenu extends JPanel {
         setLayout(new BorderLayout());
 
         // Settings icon
-        settingsIconLight = new ImageIcon("src/assets/icons/settings_light.png").getImage();
-        settingsIconDark = new ImageIcon("src/assets/icons/settings_dark.png").getImage();
+        settingsIconLight = new ImageIcon(Window.class.getResource("assets/icons/settings_light.png")).getImage();
+        settingsIconDark = new ImageIcon(Window.class.getResource("assets/icons/settings_dark.png")).getImage();
         Image scaledImage;
         if (palette.getIsDark()) {
             scaledImage = settingsIconLight.getScaledInstance(50, 50, Image.SCALE_SMOOTH);

@@ -13,7 +13,9 @@ public class Intro extends JPanel {
 
         setPreferredSize(new Dimension(800, 300));
 
-        image = Toolkit.getDefaultToolkit().getImage("src/assets/lancaster/logo.png");
+        image = new ImageIcon(
+                Window.class.getResource("/assets/lancaster/logo.png")
+        ).getImage();
         //System.out.println(image.getHeight(this) + " " + image.getWidth(this));
 
         loadingTimer = new Timer(50, e -> {

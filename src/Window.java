@@ -17,7 +17,9 @@ public class Window {
         Window.title = title;
     }
 
-    static Image icon = new ImageIcon(Window.class.getResource("/assets/lancaster/small_logo.png")).getImage();
+    static Image icon = new ImageIcon(
+            Window.class.getResource("/assets/lancaster/small_logo.png")
+    ).getImage();
     public static Image getIcon() {
         return icon;
     }

@@ -40,7 +40,7 @@ public class Login extends JPanel {
         this.palette = palette;
         this.jdbc = jdbc;
 
-        image = Toolkit.getDefaultToolkit().getImage("src/assets/lancaster/logo.png");
+        image = new ImageIcon(Window.class.getResource("assets/lancaster/logo.png")).getImage();
 
         usernameField = new JTextField(40);
         passwordField = new JPasswordField(40);
